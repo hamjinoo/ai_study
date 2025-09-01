@@ -1,0 +1,17 @@
+# core
+fastapi==0.110.0
+uvicorn==0.29.0
+pydantic==2.7.0
+
+# retrieval
+sentence-transformers==2.7.0
+faiss-cpu==1.8.0
+rank-bm25==0.2.2
+numpy==1.26.4
+scikit-learn==1.5.1
+
+# utils
+python-dotenv==1.0.1
+markdown==3.6
+pandas==2.2.2
+matplotlib==3.8.4

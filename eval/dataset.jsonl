@@ -1,0 +1,2 @@
+{"qid": 1, "question": "RAG란?", "gold": "검색과 생성을 결합한 기법", "gold_spans": ["검색", "생성"]}
+{"qid": 2, "question": "OWASP LLM Top-10은 무엇을 다루나?", "gold": "인젝션 등 보안 체크리스트", "gold_spans": ["인젝션", "보안"]}

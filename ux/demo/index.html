@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Evidence‑Grounded RAG — Demo</title>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <main class="container">
+    <h1>증거 기반 RAG 데모</h1>
+    <div class="card">
+      <label>질문</label>
+      <input id="q" placeholder="예: RAG란?"/>
+      <button id="ask">질문하기</button>
+    </div>
+    <section id="out" class="card hidden">
+      <h2 id="one_line"></h2>
+      <div id="answer_md"></div>
+      <details>
+        <summary>근거 보기</summary>
+        <div id="sources"></div>
+      </details>
+      <p class="muted" id="limits"></p>
+    </section>
+  </main>
+<script src="app.js"></script>
+</body>
+</html>
