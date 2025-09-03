@@ -3,9 +3,7 @@
 ## 초록
 
 - 지배적인 시퀸스 변환 모델들은 복잡한 순환 신경망(RNN)이나 합성곱 신경망(CNN)에 기반하여 인코더와 디코더를 포함하고 있습니다.
-
 - 가장 성능이 좋은 모델들은 인코더와 디코더를 어텐션 메커니즘으로 연결합니다.
-
 - 우리는 Transformer라는 새로운 단순한 네트워크 아키텍처를 제안하는데, 이는 오직 어텐션 메커니즘만을 사용하여 순환(RNN)이나 합성곱(CNN)을 완전히 제거합니다.
 
   - 이름도 그래서 **Transformer**라고 붙였습니다.
@@ -63,3 +61,100 @@
 - P100 GPU : 당시 최신 NVIDIA GPU.
 
 ---
+
+## Background
+
+- 순차적인 계산을 줄이려는 목표는 Extended Neural GPU, ByteNet, ConvS2S 같은 모델들의 기초가 되었는데, 이들은 모두 합성곱 신경망(CNN)을 기본 구성 요소로 사용하며, 입력과 출력의 모든 위치에 대해 은닉 표현을 병렬로 계산한다.
+  - RNN의 한계를 극복하려고 나온 모델들은 RNN 대신 **CNN을 써서 병렬 계산**을 가능하게 했다.
+- 이들 모델에서 임의의 두 입력 혹은 출력 위치 간 신호를 연결하는 데 필요한 연산 수는 그 거리에 따라 증가하는데, ConvS25에서는 선형(linear)적으로, ByteNet에서는 로그(logarithmic)적으로 증가한다.
+  - CNN 기반 모델은 병렬화는 되지만, 단어 사이가 멀리 떨어질수록 **연산이 늘어난다.**
+- 이 때문에, 멀리 떨어진 위치 간의 의존성을 학습하기가 더 어려워진다.
+  - CNN은 가까운 단어 관계는 잘 잡지만, **멀리 떨어진 단어 관계**는 잘 못 잡는다.
+- Transformer에서는 이를 일정한 수의 연산으로 줄였는데, 이는 어텐션이 가중 평균을 하기 떄문에 효과적인 해상도가 줄어드는 단점이 있지만, 이를 Multi-head Attention(3.2절)으로 보완한다.
+  - Transformer는 단어 사이 거리에 상관없이 **한 번의 연산(O(1))**으로 관계를 잡는다. 다만 평균을 내는 방식이라 세밀한 정보가 줄어드는 문제가 있는데, Multi-Head Attention으로 이를 해결한다.
+
+> - CNN 기반 모델(ConvS2S, ByteNet)은 병렬화는 가능하지만 멀리 떨어진 단어 관계 학습이 어렵다.
+> - Transformer는 거리와 상관없이 일정한 연산으로 해결한다.
+>   > - 이게 어떻게 될까
+
+- 자기어텐션(Self-Attention)은 하나의 시퀀스 안에서 서로 다른 위치들을 연결하여 그 시퀸스의 표현을 계산하는 어텐션 메커니즘이다.
+
+  - Self-Attention은 한 문장 안에서 단어들이 어떻게 관련되는지 계산해서, 문장 전체의 의미 벡터를 만든다.
+  - Self-Attention : 같은 문장 안의 단어들끼리 관계를 계산하는 어텐션
+  - Representation : 단어/문장을 벡터로 표현한 것
+
+- 자기 어텐션은 독해, 추상적 요약, 텍스트 함의, 과제 독립적 문장 표현 학습 등 다양한 작업에서 성공적으로 사용되어 왔다.
+
+- End-to-end 메모리 네트워크는 시퀀스 정렬된 순환 대신 순환 어텐션 메커니즘에 기반하여, 단순 언어 질의응답과 언어 모델링 작업에서 좋은 성능을 보여왔다.
+
+- 그러나 우리가 아는 한, Transformer는 시퀀스 정렬 RNN이나 합성곱을 사용하지 않고, 오직 자기어텐션에만 의존해 입력과 출력의 표현을 계산하는 최초의 변환 모델이다.
+  - Transformer는 RNN도 CNN도 쓰지 않고, 오직 Self-Attention만으로 작동하는 최초의 모델이다.
+
+> Self-Attention은 이미 여러 NLP 과제에서 성능이 입증됨.
+> Transformer는 Self-Attention만 단독으로 사용한 최초의 시퀀스 변환 모델.
+
+### 여기까지 Background 요약
+
+- RNN: 느리고 병렬화 불가능.
+- LSTM/GRU: 개선했지만 한계 남음.
+- CNN (ByteNet, ConvS2S): 병렬화 가능하지만 멀리 떨어진 단어 관계(long-range dependency) 학습이 어려움.
+- Self-Attention: 이미 다른 과제에서 성능 입증.
+- Transformer: 최초로 RNN·CNN을 버리고 Self-Attention만으로 만든 모델.
+
+---
+
+## Model Architecture (쉬운 요약)
+
+### 전체 구조
+
+Transformer는 기본적으로 Encoder–Decoder 구조를 따릅니다.
+
+- 인코더: 입력 문장을 벡터로 바꿈.
+- 디코더: 벡터를 받아 번역 결과(출력 문장) 생성.
+
+1️⃣ 인코더 (Encoder) - 6층
+
+1. Multi-Head Self-Attention (문장 안 단어들 관계 학습)
+2. Feed Forward Network(FFN) (단어별 변환)
+
+- Residual + LayerNorm으로 안정성 확보.
+  2️⃣ 디코더 (Decoder) - 6층
+
+1. Masked Multi-Head Self-Attention (앞 단어만 참고)
+2. Encoder–Decoder Attention (입력 문장 전체 참고)
+3. Feed Forward Network (FFN)
+
+- 역시 Residual + LayerNorm 적용.
+  3️⃣ 어텐션 메커니즘
+  4️⃣ Positional Encoding (위치 인코딩)
+  5️⃣ 출력
+
+**핵심 아이디어**
+
+- Self-Attention: 단어들 간 관계를 거리 상관없이 한 번에 학습.
+- Multi-Head Attention: 여러 관점에서 관계를 동시에 봄.
+- Positional Encoding: RNN이 없으므로, 단어 순서를 알려주는 장치.
+
+> “Transformer는 인코더·디코더 각각 6층을 쌓아, 어텐션만으로 문장 관계를 학습하고, RNN·CNN 없이도 번역 품질을 크게 끌어올린 모델이다.”
+
+### Attention 메커니즘 (3.2절)
+
+- 내가 보고 싶은 단어(Query)와
+- 어떤 단어가 관련 있는지(Key)를 비교해
+- 그 단어의 실제 정보(Value)를 가져온다.
+
+  ### 그렇다면 "Query-Key-Value" 구조에서 **도대체 어떤 기준으로 관련이 있고 없고를 판단하는가?**
+
+  즉, **어텐션이 단어 간 관계를 어떻게 알아차리는가**가 핵심이다.
+
+- ***
+
+  ***
+
+  ***
+
+  ***
+
+  ***
+
+- Attention은 어떻게 개발되고 동작하는 걸까
