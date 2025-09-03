@@ -1,43 +1,40 @@
-# AI Portfolio Template — Evidence‑Grounded RAG & Eval (v2025-09-01)
+# AI Portfolio
 
-**한 줄 핵심:** “모델을 새로 발명”이 아니라, **검색(RAG)·근거·평가·보안**을 **작동**하게 만들어 _출처가 있는 AI_ 를 만드는 템플릿입니다.
+2️⃣ 아주 쉬운 역사 맥락(필수 체크포인트만)
 
-## 폴더 구조
-```
-ai-portfolio/
-  README.md
-  requirements.txt
-  paper_notes/
-  replications/
-  rag/
-  mm_rag/
-  long_context/
-  eval/
-  ux/
-  docs/
-  scripts/
-  prompt_templates/
-  tests/
-  security.md
-  .gitignore
-  LICENSE
-```
-## 빠른 시작
-1) Python 3.10+
-2) 가상환경 생성 후 의존성 설치:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3) API 서버 실행:
-   ```bash
-   uvicorn rag.app.main:app --reload
-   ```
-4) 프런트 데모(정적): `ux/demo/index.html` 열기 → 서버는 `http://127.0.0.1:8000`
+트랜스포머(2017): RNN·CNN을 제치고 “어텐션만”으로 번역·언어 이해의 지평을 연 구조. 이후 모든 대형 모델의 기반.
+Semantic Scholar
 
-## 목표 산출물(포트폴리오 신호)
-- **출처가 있는 답변**(본문 [1][2] 각주 + 근거 하이라이트)
-- **HELM식 간단 평가 리포트**(정확성·근거성)
-- **OWASP LLM Top-10 대응 체크리스트**(인젝션 방어/권한·출처 정책)
-- **튜닝 전후 그래프**(비용·지연·정확성 프론티어)
+프리트레이닝→파인트유닝(2018–19): BERT·T5가 “사전학습+다운스트림” 표준 확립(양방향 이해·텍스트-투-텍스트 통일).
+jungtaek.github.io
+Semantic Scholar
 
-> ⚠️ 이 템플릿은 학습·포트폴리오용 뼈대입니다. 상용 배포 전에는 데이터/보안/비용 검토가 필수입니다.
+GPT-3(2020) & Few-shot: 프롬프트 몇 줄만으로 과제 수행(“인컨텍스트 러닝”). 대규모 언어모델의 일반성 부각.
+arXiv
+
+스케일링 법칙 & Chinchilla(2020–22): 성능은 모델·데이터·컴퓨트의 거듭제곱 법칙을 따르고, 토큰 수를 크게 늘리면 더 효율적임을 제시.
+arXiv
++1
+
+RLHF·InstructGPT(2022): “더 큰 모델”만으로는 부족 → 사람 피드백으로 “말을 잘 듣게” 만듦(유해성↓ 진실성↑).
+NeurIPS Proceedings
+
+RAG·멀티모달·롱컨텍스트(2023–25): 외부지식 결합(RAG), 언어+시각/음성 통합, 초장문 컨텍스트가 실무 표준으로 부상.
+arXiv
+blog.google
+
+3️⃣ 앞으로 12–24개월 흐름(가이드)
+
+롱컨텍스트/멀티모달 표준화: 10만~100만 토큰급 컨텍스트가 상시 옵션화, 문서·코드·미디어의 **‘원문 그대로 넣고 질의’**가 일상화.
+blog.google
+
+RAG 고도화: 하이브리드·그래프·멀티스텝·근거중심 생성(출처 링크·하이라이트)로 환각 감소와 감사가능성 강화.
+arXiv
++1
+
+평가·안전의 내장: 제품 단계에서 HELM류 다각 평가 + OWASP LLM Top-10 기반 보안 점검이 기본 체크리스트가 됨.
+Stanford CRFM
+OWASP
+
+거버넌스/정책 리스크 상시화: 국가·산업 규범과 책임 있는 AI 요구 증가(학계·법제 동시 확대). 투자·도입 시 정책 추세 모니터 필요.
+Stanford HAI
